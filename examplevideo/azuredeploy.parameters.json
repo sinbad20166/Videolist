@@ -1,0 +1,99 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "0.0.0.1",
+  "parameters": {
+    "projectName": {
+      "value": "template"
+    },
+    "defaultTags": {
+      "value": {
+        "Project": "Template",
+        "Creator": "Resource_Creator"
+      }
+    },
+    "securityGroups": {
+      "value": [
+        {
+          "name": "web10",
+          "SecurityRules": [
+            {
+              "name": "RDPAllow",
+              "properties": {
+                "description": "allow RDP connections",
+                "direction": "Inbound",
+                "priority": 100,
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "10.0.0.0/24",
+                "sourcePortRange": "*",
+                "destinationPortRange": "3389",
+                "access": "Allow",
+                "protocol": "Tcp"
+              }
+            },
+            {
+              "name": "RDPAllowTest",
+              "properties": {
+                "description": "allow RDP connections",
+                "direction": "Inbound",
+                "priority": 103,
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "10.0.0.0/24",
+                "sourcePortRange": "*",
+                "destinationPortRange": "221",
+                "access": "Deny",
+                "protocol": "Tcp"
+              }
+            },
+             {
+              "name": "SSHAllow",
+              "properties": {
+                "description": "allow RDP connections",
+                "direction": "Inbound",
+                "priority": 101,
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "10.0.0.0/24",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "access": "Allow",
+                "protocol": "Tcp"
+              } 
+            }
+          ]
+        },
+        {
+          "name": "app10",
+          "SecurityRules": [
+            {
+              "name": "RDPAllow",
+              "properties": {
+                "description": "allow RDP connections",
+                "direction": "Inbound",
+                "priority": 100,
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "10.0.0.0/24",
+                "sourcePortRange": "*",
+                "destinationPortRange": "3389",
+                "access": "Allow",
+                "protocol": "Tcp"
+              }
+            },
+            {
+              "name": "SSHAllow",
+              "properties": {
+                "description": "allow RDP connections",
+                "direction": "Inbound",
+                "priority": 101,
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "10.0.0.0/24",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "access": "Allow",
+                "protocol": "Tcp"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

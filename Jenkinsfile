@@ -1,22 +1,10 @@
 pipeline {
-    agent any
+    agent { label 'master' }
     stages {
-         stage('---clean---') {
-              steps {
-                  sh "hello Balclean"
-               }
-          }
-     stages {
-         stage('---test---') {
-              steps {
-                  sh "hello Baltest"
-               }
-          }
-      stages {
-         stage('---package---') {
-              steps {
-                  sh "hello Balpacakge"
-               }
-          }
-      }
- }     
+        stage('build') {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}

@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                echo "${params.Greeting} World!"
+                echo "${params.Hello} World!"
             }
         }
     }

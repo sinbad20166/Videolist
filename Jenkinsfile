@@ -9,6 +9,8 @@ pipeline {
         stage('build') {
             steps {
                 echo "${params.Hello} World!"
+                echo "${params.FirstOption} 1st!"
+                echo "${params.AnotherOption} 2nd!"
             }
         }
     }

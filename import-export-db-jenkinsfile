@@ -1,0 +1,84 @@
+pipeline {
+
+  // Export of Reach-snd database into MIR Data Reporting Services environment
+  agent {
+    label 'build_nodes'
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3'))
+    disableConcurrentBuilds()
+    timestamps()
+    azureKeyVault(
+      secrets: [
+        [envVariable: 'VSTS_USER', name: 'vstsUser', secretType:'Secret'],
+        [envVariable: 'VSTS_PAT', name: 'vstsPat', secretType:'Secret'],
+        [envVariable: 'OCTOPUS_CLI_API_KEY', name: 'octopusApiKey', secretType:'Secret'],
+      ]
+    )
+  }
+
+  parameters {
+    string(name:'version', defaultValue: '1.0.0', description: 'Please enter version of Database (format example: 1.12.0)')
+  }
+
+  environment {
+    sqlServerName="sndchmdbssqa004"
+    sqlServerUsername="SA-AZURE-CHM-SQL-SND@DEFRA.ONMICROSOFT.COM" 
+    sqlServerPassword=$(az keyvault secret show --name SND-SQL-AD-AdminAzurePass --vault-name secchminfkvt001 --query "value" -o tsv)
+    databaseName="reach-snd"
+    storageAccount="sndmirinfsto306"
+    storageResourceGroup="SNDMIRINFRGP006"
+    resourceGroup="SNDCHMINFRGP004"
+    backupFileName="reach-snd_$version.bacpac"
+
+    sqlServerNameImp="sndmirdbssqa006"
+    sqlServerUsernameImp="SA-AZURE-MIR-SQL-ADMIN-SND@defra.onmicrosoft.com"
+    sqlServerPasswordImp=$(az keyvault secret show --name sqlAadAdminPassword --vault-name secmirsndkvt001 --query "value" -o tsv)
+    resourceGroupImp="SNDMIRINFRGP006"
+    storageConnectionString=`az storage account show-connection-string -n $storageAccount -g $storageResourceGroup --query connectionString -o tsv`
+
+    databaseNameNew="reach-snd_$version"
+
+  }
+  stages {
+    stage("Export DB") {
+      parallel {
+        stage("Storage Container Key") {
+          steps {
+            sh(label: "Get Storage Container Key", script: "`az storage account show-connection-string -n $storageAccount -g $storageResourceGroup --query connectionString -o tsv`")
+            storageKey = sh(label: "Read storageKey", script: "grep -o "uM.*" <<< $storageConnectionString", returnStdout: true).trim()
+          }
+        }
+        stage("Performing Export"){
+          steps {
+            sh(label: "Export begin", script: "az sql db export -s $sqlServerName -n $databaseName -g $resourceGroup \
+                                                -u $sqlServerUsername -p $sqlServerPassword -a ADPassword \
+                                                --storage-key-type StorageAccessKey --storage-key $storageKey \
+                                                --storage-uri "https://$storageAccount.blob.core.windows.net/chmsqlexports/$backupFileName")
+            }
+          }
+        }
+      }
+    }
+    stage("Create blank DB") {
+      steps {
+        sh(label: "Creating blank DB", script: "az sql db create -g $resourceGroupImp -s $sqlServerNameImp -n $databaseNameNew \
+                                                --elastic-pool sndmirinfedp006")
+      }
+    }
+    stage("Import DB") {
+      steps {
+        sh(label: "Performing import DB", script: "az sql db import -s $sqlServerNameImp -n $databaseNameNew -g $resourceGroupImp \
+                                                   -u $sqlServerUsernameImp -p $sqlServerPasswordImp -a ADPassword \
+                                                   --storage-key-type StorageAccessKey --storage-key $storageKey \
+                                                   --storage-uri "https://$storageAccount.blob.core.windows.net/chmsqlexports/$backupFileName")
+        }
+      }
+    
+    stage("Performing SQL query permissions") {
+      steps {
+        sh(label: "Applying permissions", script: "sqlcmd -U $sqlServerUsernameImp -S $sqlServerNameImp.database.windows.net -P $sqlServerPasswordImp -d $databaseNameNew -G -i ./applying-permissions.sql")
+      }
+    }
+  }
+}

@@ -24,7 +24,7 @@ pipeline {
   environment {
     sqlServerName="sndchmdbssqa004"
     sqlServerUsername="SA-AZURE-CHM-SQL-SND@DEFRA.ONMICROSOFT.COM" 
-    sqlServerPassword=$(az keyvault secret show --name SND-SQL-AD-AdminAzurePass --vault-name secchminfkvt001 --query "value" -o tsv)
+    sqlServerPassword='az keyvault secret show --name SND-SQL-AD-AdminAzurePass --vault-name secchminfkvt001 --query "value" -o tsv'
     databaseName="reach-snd"
     storageAccount="sndmirinfsto306"
     storageResourceGroup="SNDMIRINFRGP006"

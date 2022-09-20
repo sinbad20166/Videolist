@@ -10,9 +10,9 @@ pipeline {
     timestamps()
     azureKeyVault(
       secrets: [
-        [envVariable: 'VSTS_USER', name: 'vstsUser', secretType:'Secret'],
-        [envVariable: 'VSTS_PAT', name: 'vstsPat', secretType:'Secret'],
-        [envVariable: 'OCTOPUS_CLI_API_KEY', name: 'octopusApiKey', secretType:'Secret'],
+        [envVariable: 'VSTS_USER1', name: 'vstsUser', secretType:'Secret'],
+        [envVariable: 'VSTS_PAT1', name: 'vstsPat', secretType:'Secret'],
+        [envVariable: 'OCTOPUS_CLI_API_KEY1', name: 'octopusApiKey', secretType:'Secret'],
       ]
     )
   }
@@ -22,11 +22,11 @@ pipeline {
   }
 
   environment {
-    sqlServerName="sndchmdbssqa004"
+    sqlServerName="sndchmdbssqa005"
     sqlServerUsername="SA-AZURE-CHM-SQL-SND@DEFRA.ONMICROSOFT.COM" 
     sqlServerPassword='az keyvault secret show --name SND-SQL-AD-AdminAzurePass --vault-name secchminfkvt001 --query "value" -o tsv'
     databaseName="reach-snd"
-    storageAccount="sndmirinfsto306"
+    storageAccount="sndmirinfsto307"
     storageResourceGroup="SNDMIRINFRGP006"
     resourceGroup="SNDCHMINFRGP004"
     backupFileName="reach-snd_$version.bacpac"
